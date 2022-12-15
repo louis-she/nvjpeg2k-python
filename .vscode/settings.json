@@ -1,0 +1,21 @@
+{
+  "files.associations": {
+    "*.cjson": "jsonc",
+    "*.wxss": "css",
+    "*.wxs": "javascript",
+    "*.erb": "erb",
+    "*.py.tpl": "python",
+    "*.mdx": "markdown",
+    "random": "cpp",
+    "*.tcc": "cpp",
+    "fstream": "cpp",
+    "sstream": "cpp",
+    "iosfwd": "cpp",
+    "functional": "cpp",
+    "string_view": "cpp",
+    "string": "cpp",
+    "iostream": "cpp",
+    "bitset": "cpp",
+    "atomic": "cpp"
+  }
+}
