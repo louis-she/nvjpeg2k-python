@@ -33,4 +33,4 @@ add_executable(test_nvjpeg2k "nvjpeg2k.cpp")
 
 SET_TARGET_PROPERTIES(nvjpeg2k PROPERTIES PREFIX "")
 target_link_libraries(nvjpeg2k PUBLIC ${NVJPEG2K_LIB} ${CUDART_LIB} ${FILESYS} pybind11::module)
-target_link_libraries(test_nvjpeg2k PUBLIC ${NVJPEG2K_LIB} ${CUDART_LIB} ${FILESYS} pybind11::pybind11 pybind11::embed pybind11::module pybind11::lto pybind11::windows_extras pybind11::thin_lto)
+target_link_libraries(test_nvjpeg2k PUBLIC ${NVJPEG2K_LIB} ${CUDART_LIB} ${FILESYS} pybind11::pybind11 pybind11::embed pybind11::module)

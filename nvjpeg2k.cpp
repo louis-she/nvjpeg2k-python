@@ -4,6 +4,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <limits.h>
 
 #include <fstream>
 #include <iostream>
@@ -25,13 +26,9 @@ struct Decoder {
     nvjpeg2kStreamDestroy(jpeg2k_stream);
   };
 
-  pybind11::array_t<uint16_t> decode(std::string path) {
-    std::ostringstream sstream;
-    std::ifstream fs(path.c_str());
-    sstream << fs.rdbuf();
-    const std::string str(sstream.str());
-    auto length = str.length();
-    auto bitstream_buffer = (const unsigned char *)str.c_str();
+  pybind11::array_t<uint16_t> decode(std::string bytes) {
+    auto length = bytes.length();
+    auto bitstream_buffer = (const unsigned char *)bytes.c_str();
 
     nvjpeg2kImageInfo_t image_info;
     nvjpeg2kImage_t output_image;
@@ -106,11 +103,13 @@ PYBIND11_MODULE(nvjpeg2k, m) {
 }
 
 int main() {
-  pybind11::initialize_interpreter();
-  pybind11::module nvjpeg2k = pybind11::module::import("nvjpeg2k");
-  // 2776 x 2082
-  auto decoder = nvjpeg2k.attr("Decoder")();
-  pybind11::array_t<double> result =
-      decoder.attr("decode")("/home/featurize/output_2k/1031443799.dcm.jp2");
-  pybind11::finalize_interpreter();
+  pybind11::scoped_interpreter guard{};
+
+  pybind11::exec(R"(
+    import nvjpeg2k;
+    from pathlib import Path
+    bytes = Path('/home/featurize/output_2k/1031443799.dcm.jp2').read_bytes()
+    nvjpeg2k.Decoder().decode(bytes)
+  )");
+  return 0;
 }
