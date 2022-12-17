@@ -19,7 +19,7 @@ See this [kaggle notebook](https://www.kaggle.com/code/snaker/easy-load-the-imag
 
 ```bash
 # get the source code
-git clone https://github.com/louis-she/nvjpeg2k-python.git
+git clone --recursive https://github.com/louis-she/nvjpeg2k-python.git
 cd nvjpeg2k-python
 
 # build the extension
