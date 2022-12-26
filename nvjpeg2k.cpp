@@ -85,7 +85,7 @@ struct Decoder {
                  image_info.image_height, cudaMemcpyDeviceToHost, stream);
     cudaStreamSynchronize(stream);
     for (uint32_t c = 0; c < image_info.num_components; c++) {
-      cudaFreeAsync(output_image.pixel_data[c], stream);
+      cudaFree(output_image.pixel_data[c]);
     }
 
     return result.reshape({image_info.image_height, image_info.image_width});
