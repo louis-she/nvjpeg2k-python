@@ -17,6 +17,7 @@ struct Decoder {
     nvjpeg2kStreamCreate(&jpeg2k_stream);
     nvjpeg2kDecodeParamsCreate(&decode_params);
     nvjpeg2kDecodeParamsSetRGBOutput(decode_params, 0);
+    cudaStreamCreate(&stream);
   };
 
   ~Decoder() {
@@ -24,6 +25,7 @@ struct Decoder {
     nvjpeg2kDecodeStateDestroy(jpeg2k_decode_state);
     nvjpeg2kDestroy(jpeg2k_handle);
     nvjpeg2kStreamDestroy(jpeg2k_stream);
+    cudaStreamDestroy(stream);
   };
 
   pybind11::array_t<uint16_t> decode(std::string bytes) {
@@ -70,19 +72,20 @@ struct Decoder {
           image_info.image_width * bytes_per_element, image_info.image_height);
     }
     nvjpeg2kDecodeImage(jpeg2k_handle, jpeg2k_decode_state, jpeg2k_stream,
-                        decode_params, &output_image, 0);
+                        decode_params, &output_image, stream);
 
     auto pixels_length = image_info.image_height * image_info.image_width *
                          image_info.num_components;
     auto result = pybind11::array_t<uint16_t>(pixels_length);
 
-    cudaMemcpy2D(result.request().ptr,
+    cudaMemcpy2DAsync(result.request().ptr,
                  image_info.image_width * bytes_per_element,
                  output_image.pixel_data[0], output_image.pitch_in_bytes[0],
                  image_info.image_width * bytes_per_element,
-                 image_info.image_height, cudaMemcpyDeviceToHost);
+                 image_info.image_height, cudaMemcpyDeviceToHost, stream);
+    cudaStreamSynchronize(stream);
     for (uint32_t c = 0; c < image_info.num_components; c++) {
-      cudaFree(output_image.pixel_data[c]);
+      cudaFreeAsync(output_image.pixel_data[c], stream);
     }
 
     return result.reshape({image_info.image_height, image_info.image_width});
@@ -92,6 +95,7 @@ struct Decoder {
   nvjpeg2kStream_t jpeg2k_stream;
   nvjpeg2kDecodeState_t jpeg2k_decode_state;
   nvjpeg2kDecodeParams_t decode_params;
+  cudaStream_t stream;
 };
 
 PYBIND11_MODULE(nvjpeg2k, m) {
